@@ -1,0 +1,16 @@
+apply plugin: 'java'
+
+group = 'org.jonasfagundes'
+version = '2013.04'
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+repositories {
+  mavenCentral()
+}
+
+dependencies {
+  compile 'org.apache.commons:commons-lang3:3.1'
+  compile 'org.slf4j:slf4j-api:1.7.2'
+}

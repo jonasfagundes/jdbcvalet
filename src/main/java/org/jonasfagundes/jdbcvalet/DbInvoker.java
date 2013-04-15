@@ -25,9 +25,8 @@ public class DbInvoker {
   }
 
 
-  public <T> T execute(QueryReaderCommand<T> command) throws SQLException {
-    try (Connection connection = getConnection();
-         PreparedStatement stmt = connection.prepareStatement(command.getSql())) {
+  public <T> T execute(Connection connection, QueryReaderCommand<T> command) throws SQLException {
+    try (PreparedStatement stmt = connection.prepareStatement(command.getSql())) {
       T result;
       ResultSet rs;
       long startTime;
@@ -45,9 +44,15 @@ public class DbInvoker {
   }
 
 
-  public void execute(QueryExecutorCommand command) throws SQLException {
-    try (Connection connection = getConnection();
-         PreparedStatement stmt = connection.prepareStatement(command.getSql())) {
+  public <T> T execute(QueryReaderCommand<T> command) throws SQLException {
+    try (Connection connection = getConnection()) {
+      return execute(connection, command);
+    }
+  }
+
+
+  public void execute(Connection connection, QueryExecutorCommand command) throws SQLException {
+    try (PreparedStatement stmt = connection.prepareStatement(command.getSql())) {
       long startTime;
       long endTime;
 
@@ -60,9 +65,15 @@ public class DbInvoker {
   }
 
 
-  public <T> T execute(StoredProcedureReaderCommand<T> command) throws SQLException {
-    try (Connection connection = getConnection();
-         CallableStatement stmt = connection.prepareCall(command.getSql())) {
+  public void execute(QueryExecutorCommand command) throws SQLException {
+    try (Connection connection = getConnection()) {
+      execute(connection, command);
+    }
+  }
+
+
+  public <T> T execute(Connection connection, StoredProcedureReaderCommand<T> command) throws SQLException {
+    try (CallableStatement stmt = connection.prepareCall(command.getSql())) {
       T result;
       long startTime;
       long endTime;
@@ -78,9 +89,15 @@ public class DbInvoker {
   }
 
 
-  public void execute(StoredProcedureExecutorCommand command) throws SQLException {
-    try (Connection connection = getConnection();
-         CallableStatement stmt = connection.prepareCall(command.getSql())) {
+  public <T> T execute(StoredProcedureReaderCommand<T> command) throws SQLException {
+    try (Connection connection = getConnection()) {
+      return execute(connection, command);
+    }
+  }
+
+
+  public void execute(Connection connection, StoredProcedureExecutorCommand command) throws SQLException {
+    try (CallableStatement stmt = connection.prepareCall(command.getSql())) {
       long startTime;
       long endTime;
 
@@ -89,6 +106,13 @@ public class DbInvoker {
       stmt.execute();
       endTime = System.nanoTime();
       logPerformance(startTime, endTime, command.getSql());
+    }
+  }
+
+
+  public void execute(StoredProcedureExecutorCommand command) throws SQLException {
+    try (Connection connection = getConnection()) {
+      execute(connection, command);
     }
   }
 

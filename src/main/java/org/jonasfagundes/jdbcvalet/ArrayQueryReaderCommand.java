@@ -8,21 +8,21 @@ import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
 public abstract class ArrayQueryReaderCommand<T> implements QueryReaderCommand<T> {
-  protected String getIdsPlaceholders(final Collection<Integer> ids) {
-    return ids.size() == 1
-         ? " = ?"
-         : " IN (" + StringUtils.join(getPlaceholderList(ids), ", ") + ")";
+  protected String getPlaceholders(final Collection<? extends Object> values) {
+    return values.size() == 1
+           ? " = ?"
+           : " IN (" + StringUtils.join(getPlaceholderList(values), ", ") + ")";
   }
 
 
-  protected int setIds(PreparedStatement stmt, int initialIndex, Collection<Integer> ids) throws SQLException {
-    for (int id : ids) {
-      stmt.setInt(initialIndex++, id);
+  protected int setValues(PreparedStatement stmt, int initialIndex, Collection<? extends Object> values) throws SQLException {
+    for (Object value : values) {
+      stmt.setObject(initialIndex++, value);
     }
     return initialIndex;
   }
 
-  private List<String> getPlaceholderList(final Collection<Integer> ids) {
+  private List<String> getPlaceholderList(final Collection<? extends Object> ids) {
     List<String> placeholders = new ArrayList<>();
 
     for (int i = ids.size(); i > 0; i--) {

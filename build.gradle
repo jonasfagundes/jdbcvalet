@@ -1,7 +1,7 @@
 apply plugin: 'java'
 
 group = 'org.jonasfagundes'
-version = '2013.04.02'
+version = '2013.04.03'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7

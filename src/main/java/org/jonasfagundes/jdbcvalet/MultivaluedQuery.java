@@ -7,18 +7,18 @@ import java.util.Collection;
 import java.util.List;
 import org.apache.commons.lang3.StringUtils;
 
-public abstract class ArrayQueryReaderCommand<T> implements QueryReaderCommand<T> {
-  protected String getPlaceholders(final Collection<? extends Object> values) {
+public class MultivaluedQuery {
+  public String getPlaceholders(final Collection<? extends Object> values) {
     return getBasePlaceholders(true, values);
   }
 
 
-  protected String getNegatedPlaceholders(final Collection<? extends Object> values) {
+  public String getNegatedPlaceholders(final Collection<? extends Object> values) {
     return getBasePlaceholders(false, values);
   }
 
 
-  protected int setValues(PreparedStatement stmt, int initialIndex, Collection<? extends Object> values) throws SQLException {
+  public int setValues(PreparedStatement stmt, int initialIndex, Collection<? extends Object> values) throws SQLException {
     for (Object value : values) {
       stmt.setObject(initialIndex++, value);
     }

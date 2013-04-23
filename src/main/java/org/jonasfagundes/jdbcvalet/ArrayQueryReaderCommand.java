@@ -9,9 +9,12 @@ import org.apache.commons.lang3.StringUtils;
 
 public abstract class ArrayQueryReaderCommand<T> implements QueryReaderCommand<T> {
   protected String getPlaceholders(final Collection<? extends Object> values) {
-    return values.size() == 1
-           ? " = ?"
-           : " IN (" + StringUtils.join(getPlaceholderList(values), ", ") + ")";
+    return getBasePlaceholders(true, values);
+  }
+
+
+  protected String getNegatedPlaceholders(final Collection<? extends Object> values) {
+    return getBasePlaceholders(false, values);
   }
 
 
@@ -21,6 +24,24 @@ public abstract class ArrayQueryReaderCommand<T> implements QueryReaderCommand<T
     }
     return initialIndex;
   }
+
+
+  private String getBasePlaceholders(boolean equals, final Collection<? extends Object> values) {
+    return values.size() == 1
+           ? " " + getEqualityOperator(equals) + " ?"
+           : " " + getIncludeOperator(equals) + " (" + StringUtils.join(getPlaceholderList(values), ", ") + ")";
+  }
+
+
+  private String getIncludeOperator(boolean equals) {
+    return equals ? "IN" : "NOT IN";
+  }
+
+
+  private String getEqualityOperator(boolean equals) {
+    return equals ? "=" : "<>";
+  }
+
 
   private List<String> getPlaceholderList(final Collection<? extends Object> ids) {
     List<String> placeholders = new ArrayList<>();

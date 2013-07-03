@@ -26,93 +26,141 @@ public class DbInvoker {
 
 
   public <T> T execute(Connection connection, QueryReaderCommand<T> command) throws SQLException {
-    try (PreparedStatement stmt = connection.prepareStatement(command.getSql())) {
-      T result;
-      ResultSet rs;
-      long startTime;
-      long endTime;
+    PreparedStatement stmt = connection.prepareStatement(command.getSql());
+    T result;
+    ResultSet rs;
+    long startTime;
+    long endTime;
 
-      command.bind(stmt);
-      startTime = System.nanoTime();
-      rs = stmt.executeQuery();
-      endTime = System.nanoTime();
-      logPerformance(startTime, endTime, command.getSql());
-      result = command.parse(rs);
-      rs.close();
-      return result;
-    }
+    command.bind(stmt);
+    startTime = System.nanoTime();
+    rs = stmt.executeQuery();
+    endTime = System.nanoTime();
+    logPerformance(startTime, endTime, command.getSql());
+    result = command.parse(rs);
+    rs.close();
+    return result;
   }
 
 
   public <T> T execute(QueryReaderCommand<T> command) throws SQLException {
-    try (Connection connection = getConnection()) {
-      return execute(connection, command);
+    Connection connection = getConnection();
+
+    try {
+      T result = execute(connection, command);
+
+      connection.close();
+      return result;
+    } catch (SQLException e) {
+      if (connection != null && !connection.isClosed()) {
+        try {
+          connection.close();
+        } catch (Exception e2) {
+          // Ignored intentionally
+        }
+      }
+      throw e;
     }
   }
 
 
   public void execute(Connection connection, QueryExecutorCommand command) throws SQLException {
-    try (PreparedStatement stmt = connection.prepareStatement(command.getSql())) {
-      long startTime;
-      long endTime;
+    PreparedStatement stmt = connection.prepareStatement(command.getSql());
+    long startTime;
+    long endTime;
 
-      command.bind(stmt);
-      startTime = System.nanoTime();
-      stmt.execute();
-      endTime = System.nanoTime();
-      logPerformance(startTime, endTime, command.getSql());
-    }
+    command.bind(stmt);
+    startTime = System.nanoTime();
+    stmt.execute();
+    endTime = System.nanoTime();
+    logPerformance(startTime, endTime, command.getSql());
   }
 
 
   public void execute(QueryExecutorCommand command) throws SQLException {
-    try (Connection connection = getConnection()) {
+    Connection connection = getConnection();
+
+    try {
       execute(connection, command);
+      connection.close();
+    } catch (SQLException e) {
+      if (connection != null && !connection.isClosed()) {
+        try {
+          connection.close();
+        } catch (Exception e2) {
+          // Ignored intentionally
+        }
+      }
+      throw e;
     }
   }
 
 
   public <T> T execute(Connection connection, StoredProcedureReaderCommand<T> command) throws SQLException {
-    try (CallableStatement stmt = connection.prepareCall(command.getSql())) {
-      T result;
-      long startTime;
-      long endTime;
+    CallableStatement stmt = connection.prepareCall(command.getSql());
+    T result;
+    long startTime;
+    long endTime;
 
-      command.bind(stmt);
-      startTime = System.nanoTime();
-      stmt.execute();
-      endTime = System.nanoTime();
-      logPerformance(startTime, endTime, command.getSql());
-      result = command.parse(stmt);
-      return result;
-    }
+    command.bind(stmt);
+    startTime = System.nanoTime();
+    stmt.execute();
+    endTime = System.nanoTime();
+    logPerformance(startTime, endTime, command.getSql());
+    result = command.parse(stmt);
+    return result;
   }
 
 
   public <T> T execute(StoredProcedureReaderCommand<T> command) throws SQLException {
-    try (Connection connection = getConnection()) {
-      return execute(connection, command);
+    Connection connection = getConnection();
+
+    try {
+      T result = execute(connection, command);
+
+      connection.close();
+      return result;
+    } catch (SQLException e) {
+      if (connection != null && !connection.isClosed()) {
+        try {
+          connection.close();
+        } catch (Exception e2) {
+          // Ignored intentionally
+        }
+      }
+      throw e;
     }
   }
 
 
   public void execute(Connection connection, StoredProcedureExecutorCommand command) throws SQLException {
-    try (CallableStatement stmt = connection.prepareCall(command.getSql())) {
-      long startTime;
-      long endTime;
+    CallableStatement stmt = connection.prepareCall(command.getSql());
+    long startTime;
+    long endTime;
 
-      command.bind(stmt);
-      startTime = System.nanoTime();
-      stmt.execute();
-      endTime = System.nanoTime();
-      logPerformance(startTime, endTime, command.getSql());
-    }
+    command.bind(stmt);
+    startTime = System.nanoTime();
+    stmt.execute();
+    endTime = System.nanoTime();
+    logPerformance(startTime, endTime, command.getSql());
   }
 
 
   public void execute(StoredProcedureExecutorCommand command) throws SQLException {
-    try (Connection connection = getConnection()) {
+    Connection connection = getConnection();
+
+    try {
       execute(connection, command);
+      connection.close();
+    } catch (SQLException e) {
+      if (connection != null && !connection.isClosed()) {
+        try {
+          connection.close();
+        } catch (Exception e2) {
+          // Ignored intentionally
+        }
+      }
+      throw e;
     }
   }
 

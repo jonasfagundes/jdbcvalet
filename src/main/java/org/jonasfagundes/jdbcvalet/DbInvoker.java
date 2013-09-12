@@ -15,7 +15,12 @@ public class DbInvoker {
 
 
   public DbInvoker(DataSource ds) {
-    this.logger = LoggerFactory.getLogger(getClass());
+    this(ds, LoggerFactory.getLogger(DbInvoker.class));
+  }
+
+
+  public DbInvoker(DataSource ds, Logger logger) {
+    this.logger = logger;
     this.ds = ds;
   }
 

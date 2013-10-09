@@ -54,6 +54,7 @@ public class DbInvoker {
     try {
       T result = execute(connection, command);
 
+      connection.commit();
       connection.close();
       return result;
     } catch (SQLException e) {
@@ -82,11 +83,12 @@ public class DbInvoker {
   }
 
 
-  public void execute(QueryExecutorCommand command) throws SQLException {
+   public void execute(QueryExecutorCommand command) throws SQLException {
     Connection connection = getConnection();
 
     try {
       execute(connection, command);
+      connection.commit();
       connection.close();
     } catch (SQLException e) {
       if (connection != null && !connection.isClosed()) {
@@ -123,6 +125,7 @@ public class DbInvoker {
     try {
       T result = execute(connection, command);
 
+      connection.commit();
       connection.close();
       return result;
     } catch (SQLException e) {
@@ -156,6 +159,7 @@ public class DbInvoker {
 
     try {
       execute(connection, command);
+      connection.commit();
       connection.close();
     } catch (SQLException e) {
       if (connection != null && !connection.isClosed()) {

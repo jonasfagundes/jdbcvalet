@@ -44,6 +44,7 @@ public class DbInvoker {
     logPerformance(startTime, endTime, command.getSql());
     result = command.parse(rs);
     rs.close();
+    stmt.close();
     return result;
   }
 
@@ -79,6 +80,7 @@ public class DbInvoker {
     startTime = System.nanoTime();
     stmt.execute();
     endTime = System.nanoTime();
+    stmt.close();
     logPerformance(startTime, endTime, command.getSql());
   }
 
@@ -113,6 +115,7 @@ public class DbInvoker {
     startTime = System.nanoTime();
     stmt.execute();
     endTime = System.nanoTime();
+    stmt.close();
     logPerformance(startTime, endTime, command.getSql());
     result = command.parse(stmt);
     return result;
@@ -150,6 +153,7 @@ public class DbInvoker {
     startTime = System.nanoTime();
     stmt.execute();
     endTime = System.nanoTime();
+    stmt.close();
     logPerformance(startTime, endTime, command.getSql());
   }
 

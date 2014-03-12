@@ -105,6 +105,57 @@ public class DbInvoker {
   }
 
 
+  public int executeWithIdentity(Connection connection, QueryExecutorCommand command) throws SQLException {
+    int generatedKey;
+    PreparedStatement stmt = connection.prepareStatement(command.getSql());
+    long startTime;
+    long endTime;
+
+    command.bind(stmt);
+    startTime = System.nanoTime();
+    stmt.execute();
+    endTime = System.nanoTime();
+    generatedKey = getGeneratedKey(stmt);
+    stmt.close();
+    logPerformance(startTime, endTime, command.getSql());
+
+    return generatedKey;
+  }
+
+
+  private int getGeneratedKey(PreparedStatement stmt) throws SQLException {
+    int generatedKey;ResultSet rs = stmt.getGeneratedKeys();
+
+    rs.next();
+    generatedKey = rs.getInt(1);
+    rs.close();
+    
+    return generatedKey;
+  }
+
+
+  public int executeWithIdentity(QueryExecutorCommand command) throws SQLException {
+    Connection connection = getConnection();
+    int generatedKey;
+
+    try {
+      generatedKey = executeWithIdentity(connection, command);
+      connection.commit();
+      connection.close();
+    } catch (SQLException e) {
+      if (connection != null && !connection.isClosed()) {
+        try {
+          connection.close();
+        } catch (Exception e2) {
+          // Ignored intentionally
+        }
+      }
+      throw e;
+    }
+    return generatedKey;
+  }
+
+
   public <T> T execute(Connection connection, StoredProcedureReaderCommand<T> command) throws SQLException {
     CallableStatement stmt = connection.prepareCall(command.getSql());
     T result;

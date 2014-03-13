@@ -1,9 +1,15 @@
 package org.jonasfagundes.jdbcvalet;
 
-import java.sql.*;
 import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.sql.CallableStatement;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 
 public class DbInvoker {
   private DataSource ds;

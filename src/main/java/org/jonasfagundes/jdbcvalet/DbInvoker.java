@@ -1,13 +1,15 @@
 package org.jonasfagundes.jdbcvalet;
 
+import javax.sql.DataSource;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.sql.CallableStatement;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import javax.sql.DataSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.sql.Statement;
 
 public class DbInvoker {
   private DataSource ds;
@@ -107,7 +109,7 @@ public class DbInvoker {
 
   public int executeWithIdentity(Connection connection, QueryExecutorCommand command) throws SQLException {
     int generatedKey;
-    PreparedStatement stmt = connection.prepareStatement(command.getSql());
+    PreparedStatement stmt = connection.prepareStatement(command.getSql(), Statement.RETURN_GENERATED_KEYS);
     long startTime;
     long endTime;
 
@@ -124,7 +126,8 @@ public class DbInvoker {
 
 
   private int getGeneratedKey(PreparedStatement stmt) throws SQLException {
-    int generatedKey;ResultSet rs = stmt.getGeneratedKeys();
+    int generatedKey;
+    ResultSet rs = stmt.getGeneratedKeys();
 
     rs.next();
     generatedKey = rs.getInt(1);

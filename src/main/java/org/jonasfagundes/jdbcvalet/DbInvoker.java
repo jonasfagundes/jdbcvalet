@@ -124,7 +124,8 @@ public class DbInvoker {
 
 
   private int getGeneratedKey(PreparedStatement stmt) throws SQLException {
-    int generatedKey;ResultSet rs = stmt.getGeneratedKeys();
+    int generatedKey;
+    ResultSet rs = stmt.getGeneratedKeys();
 
     rs.next();
     generatedKey = rs.getInt(1);

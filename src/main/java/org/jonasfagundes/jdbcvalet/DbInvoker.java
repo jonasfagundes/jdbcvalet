@@ -11,53 +11,78 @@ import org.slf4j.LoggerFactory;
 
 public class DbInvoker {
   public <T> T execute(Connection connection, QueryReaderCommand<T> command) throws SQLException {
-    PreparedStatement stmt = connection.prepareStatement(command.getSql());
-    T result;
-    ResultSet rs;
-    long startTime;
-    long endTime;
+    PreparedStatement stmt = null;
+    ResultSet rs = null;
 
-    command.bind(stmt);
-    startTime = System.nanoTime();
-    rs = stmt.executeQuery();
-    endTime = System.nanoTime();
-    logPerformance(startTime, endTime, command.getSql());
-    result = command.parse(rs);
-    rs.close();
-    stmt.close();
-    return result;
+    try {
+      T result;
+      long startTime;
+      long endTime;
+
+      stmt = connection.prepareStatement(command.getSql());
+      command.bind(stmt);
+      startTime = System.nanoTime();
+      rs = stmt.executeQuery();
+      endTime = System.nanoTime();
+      logPerformance(startTime, endTime, command.getSql());
+      result = command.parse(rs);
+      rs.close();
+      stmt.close();
+      return result;
+    } catch (SQLException e) {
+      closeWithoutException(rs);
+      closeWithoutException(stmt);
+      rollbackWithoutException(connection);
+      throw e;
+    }
   }
 
 
   public void execute(Connection connection, QueryExecutorCommand command) throws SQLException {
-    PreparedStatement stmt = connection.prepareStatement(command.getSql());
-    long startTime;
-    long endTime;
+    PreparedStatement stmt = null;
 
-    command.bind(stmt);
-    startTime = System.nanoTime();
-    stmt.execute();
-    endTime = System.nanoTime();
-    stmt.close();
-    logPerformance(startTime, endTime, command.getSql());
+    try {
+      long startTime;
+      long endTime;
+
+      stmt = connection.prepareStatement(command.getSql());
+      command.bind(stmt);
+      startTime = System.nanoTime();
+      stmt.execute();
+      endTime = System.nanoTime();
+      stmt.close();
+      logPerformance(startTime, endTime, command.getSql());
+    } catch (SQLException e) {
+      closeWithoutException(stmt);
+      rollbackWithoutException(connection);
+      throw e;
+    }
   }
 
 
   public int executeWithIdentity(Connection connection, QueryExecutorCommand command) throws SQLException {
-    int generatedKey;
-    PreparedStatement stmt = connection.prepareStatement(command.getSql(), Statement.RETURN_GENERATED_KEYS);
-    long startTime;
-    long endTime;
+    PreparedStatement stmt = null;
 
-    command.bind(stmt);
-    startTime = System.nanoTime();
-    stmt.execute();
-    endTime = System.nanoTime();
-    generatedKey = getGeneratedKey(stmt);
-    stmt.close();
-    logPerformance(startTime, endTime, command.getSql());
+    try {
+      int generatedKey;
+      long startTime;
+      long endTime;
 
-    return generatedKey;
+      stmt = connection.prepareStatement(command.getSql(), Statement.RETURN_GENERATED_KEYS);
+      command.bind(stmt);
+      startTime = System.nanoTime();
+      stmt.execute();
+      endTime = System.nanoTime();
+      generatedKey = getGeneratedKey(stmt);
+      stmt.close();
+      logPerformance(startTime, endTime, command.getSql());
+
+      return generatedKey;
+    } catch (SQLException e) {
+      closeWithoutException(stmt);
+      rollbackWithoutException(connection);
+      throw e;
+    }
   }
 
 
@@ -74,33 +99,50 @@ public class DbInvoker {
 
 
   public <T> T execute(Connection connection, StoredProcedureReaderCommand<T> command) throws SQLException {
-    CallableStatement stmt = connection.prepareCall(command.getSql());
-    T result;
-    long startTime;
-    long endTime;
+    CallableStatement stmt = null;
 
-    command.bind(stmt);
-    startTime = System.nanoTime();
-    stmt.execute();
-    endTime = System.nanoTime();
-    stmt.close();
-    logPerformance(startTime, endTime, command.getSql());
-    result = command.parse(stmt);
-    return result;
+    try {
+      T result;
+      long startTime;
+      long endTime;
+
+      stmt = connection.prepareCall(command.getSql());
+      command.bind(stmt);
+      startTime = System.nanoTime();
+      stmt.execute();
+      endTime = System.nanoTime();
+      stmt.close();
+      logPerformance(startTime, endTime, command.getSql());
+      result = command.parse(stmt);
+      return result;
+    } catch (SQLException e) {
+      closeWithoutException(stmt);
+      rollbackWithoutException(connection);
+      throw e;
+    }
   }
 
 
   public void execute(Connection connection, StoredProcedureExecutorCommand command) throws SQLException {
-    CallableStatement stmt = connection.prepareCall(command.getSql());
-    long startTime;
-    long endTime;
+    CallableStatement stmt = null;
 
-    command.bind(stmt);
-    startTime = System.nanoTime();
-    stmt.execute();
-    endTime = System.nanoTime();
-    stmt.close();
-    logPerformance(startTime, endTime, command.getSql());
+    try {
+      long startTime;
+      long endTime;
+
+      stmt = connection.prepareCall(command.getSql());
+      command.bind(stmt);
+      startTime = System.nanoTime();
+      stmt.execute();
+      endTime = System.nanoTime();
+      stmt.close();
+      logPerformance(startTime, endTime, command.getSql());
+    } catch (SQLException e) {
+      closeWithoutException(stmt);
+      rollbackWithoutException(connection);
+      throw e;
+
+    }
   }
 
 
@@ -115,5 +157,27 @@ public class DbInvoker {
 
   private long convertNanoToMilliSeconds(long timeInNano) {
     return timeInNano / 1000000;
+  }
+
+
+  private void closeWithoutException(AutoCloseable resource) {
+    if (resource != null) {
+      try {
+        resource.close();
+      } catch (Exception e) {
+        // Intentionally hidden, first exception will be raised
+      }
+    }
+  }
+
+
+  private void rollbackWithoutException(Connection connection) {
+    if (connection != null) {
+      try {
+        connection.close();
+      } catch (Exception e) {
+        // Intentionally hidden, first exception will be raised
+      }
+    }
   }
 }

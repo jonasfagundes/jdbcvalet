@@ -2,7 +2,7 @@ apply plugin: 'java'
 apply plugin: 'maven'
 
 group = 'org.jonasfagundes'
-version = '2014.03.02'
+version = '2014.06.01'
 
 sourceCompatibility = 1.7
 targetCompatibility = 1.7

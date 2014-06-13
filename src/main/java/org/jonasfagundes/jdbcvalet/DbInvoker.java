@@ -10,19 +10,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DbInvoker {
-  private Logger logger;
-
-
-  public DbInvoker() {
-    this(LoggerFactory.getLogger(DbInvoker.class));
-  }
-
-
-  public DbInvoker(Logger logger) {
-    this.logger = logger;
-  }
-
-
   public <T> T execute(Connection connection, QueryReaderCommand<T> command) throws SQLException {
     PreparedStatement stmt = connection.prepareStatement(command.getSql());
     T result;
@@ -118,9 +105,11 @@ public class DbInvoker {
 
 
   private void logPerformance(long startTimeInNano, long endTimeInNano, String sql) {
-    this.logger.info("Took {} ms to run the query:\n{}",
-                     convertNanoToMilliSeconds(endTimeInNano - startTimeInNano),
-                     sql);
+    Logger logger = LoggerFactory.getLogger(getClass());
+
+    logger.info("Took {} ms to run the query:\n{}",
+                convertNanoToMilliSeconds(endTimeInNano - startTimeInNano),
+                sql);
   }
 
 

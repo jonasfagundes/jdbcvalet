@@ -1,6 +1,5 @@
 package org.jonasfagundes.jdbcvalet;
 
-import javax.sql.DataSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,23 +11,16 @@ import java.sql.SQLException;
 import java.sql.Statement;
 
 public class DbInvoker {
-  private DataSource ds;
   private Logger logger;
 
 
-  public DbInvoker(DataSource ds) {
-    this(ds, LoggerFactory.getLogger(DbInvoker.class));
+  public DbInvoker() {
+    this(LoggerFactory.getLogger(DbInvoker.class));
   }
 
 
-  public DbInvoker(DataSource ds, Logger logger) {
+  public DbInvoker(Logger logger) {
     this.logger = logger;
-    this.ds = ds;
-  }
-
-
-  public Connection getConnection() throws SQLException {
-    return this.ds.getConnection();
   }
 
 
@@ -51,28 +43,6 @@ public class DbInvoker {
   }
 
 
-  public <T> T execute(QueryReaderCommand<T> command) throws SQLException {
-    Connection connection = getConnection();
-
-    try {
-      T result = execute(connection, command);
-
-      connection.commit();
-      connection.close();
-      return result;
-    } catch (SQLException e) {
-      if (connection != null && !connection.isClosed()) {
-        try {
-          connection.close();
-        } catch (Exception e2) {
-          // Ignored intentionally
-        }
-      }
-      throw e;
-    }
-  }
-
-
   public void execute(Connection connection, QueryExecutorCommand command) throws SQLException {
     PreparedStatement stmt = connection.prepareStatement(command.getSql());
     long startTime;
@@ -84,26 +54,6 @@ public class DbInvoker {
     endTime = System.nanoTime();
     stmt.close();
     logPerformance(startTime, endTime, command.getSql());
-  }
-
-
-   public void execute(QueryExecutorCommand command) throws SQLException {
-    Connection connection = getConnection();
-
-    try {
-      execute(connection, command);
-      connection.commit();
-      connection.close();
-    } catch (SQLException e) {
-      if (connection != null && !connection.isClosed()) {
-        try {
-          connection.close();
-        } catch (Exception e2) {
-          // Ignored intentionally
-        }
-      }
-      throw e;
-    }
   }
 
 
@@ -132,29 +82,7 @@ public class DbInvoker {
     rs.next();
     generatedKey = rs.getInt(1);
     rs.close();
-    
-    return generatedKey;
-  }
 
-
-  public int executeWithIdentity(QueryExecutorCommand command) throws SQLException {
-    Connection connection = getConnection();
-    int generatedKey;
-
-    try {
-      generatedKey = executeWithIdentity(connection, command);
-      connection.commit();
-      connection.close();
-    } catch (SQLException e) {
-      if (connection != null && !connection.isClosed()) {
-        try {
-          connection.close();
-        } catch (Exception e2) {
-          // Ignored intentionally
-        }
-      }
-      throw e;
-    }
     return generatedKey;
   }
 
@@ -176,28 +104,6 @@ public class DbInvoker {
   }
 
 
-  public <T> T execute(StoredProcedureReaderCommand<T> command) throws SQLException {
-    Connection connection = getConnection();
-
-    try {
-      T result = execute(connection, command);
-
-      connection.commit();
-      connection.close();
-      return result;
-    } catch (SQLException e) {
-      if (connection != null && !connection.isClosed()) {
-        try {
-          connection.close();
-        } catch (Exception e2) {
-          // Ignored intentionally
-        }
-      }
-      throw e;
-    }
-  }
-
-
   public void execute(Connection connection, StoredProcedureExecutorCommand command) throws SQLException {
     CallableStatement stmt = connection.prepareCall(command.getSql());
     long startTime;
@@ -209,26 +115,6 @@ public class DbInvoker {
     endTime = System.nanoTime();
     stmt.close();
     logPerformance(startTime, endTime, command.getSql());
-  }
-
-
-  public void execute(StoredProcedureExecutorCommand command) throws SQLException {
-    Connection connection = getConnection();
-
-    try {
-      execute(connection, command);
-      connection.commit();
-      connection.close();
-    } catch (SQLException e) {
-      if (connection != null && !connection.isClosed()) {
-        try {
-          connection.close();
-        } catch (Exception e2) {
-          // Ignored intentionally
-        }
-      }
-      throw e;
-    }
   }
 
 
